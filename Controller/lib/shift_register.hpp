@@ -39,6 +39,24 @@ public:
 
     }
 
+    inline void clear() {
+        // assume we clear RX buffers, hence the `shift` might occur synchronously
+        // this is as safe as I can think of
+        mHead = 0; // single op to clear this buffer
+        mTail = 0; // this is safe anyway
+        mSize = mHead; // if mHead has moved since we changed it, then size is updated?
+    }
+
+    inline void seek(I count) {
+        if(count < mSize) {
+            mSize -= count;
+            mTail = mod(mTail + count);
+        } else {
+            mTail = mHead;
+            mSize = 0;
+        }
+    }
+
     /**
      * Attempt to put a new value into the shift register
      * Returns true if the data was copied in

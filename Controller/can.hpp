@@ -11,6 +11,8 @@
 namespace can {
 
 void reset();
+void request_read();
+void request_write(uint8_t value);
 
 }
 

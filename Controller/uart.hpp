@@ -12,10 +12,16 @@
 
 namespace uart {
 
-
 void Init();
 void transmit(uint8_t value);
 uint8_t receive();
+uint8_t countrx();
+uint8_t counttx();
+void delay_cycles(unsigned int count);
+bool read(uint8_t& result);
+
+void clear_rx();
+void clear_tx();
 
 // helpers, header defined so they can be inline'd better??
 
@@ -42,6 +48,17 @@ inline void write(const char* data, uint8_t count) {
     for(uint8_t i = 0; i < count; i++) {
         transmit(data[i]);
     }
+}
+
+/**
+ * Write uint8 byte as 2-char hex
+ */
+inline void writeHex(uint8_t data) {
+    const char* LOOKUP = "0123456789abcdef";
+    char a = LOOKUP[static_cast<uint8_t>(data & 0xF)];
+    char b = LOOKUP[static_cast<uint8_t>((data >> 4) & 0xF)];
+    transmit(b);
+    transmit(a);
 }
 
 template<typename T, unsigned int bufsize>

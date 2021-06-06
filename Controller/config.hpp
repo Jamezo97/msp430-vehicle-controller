@@ -16,7 +16,7 @@
 #define SMCLK_CALB CALDCO_8MHZ
 #define SMCLOCK_RATE (8000000)
 
-#define SPI_CLOCK_RATE (8000000)
+#define SPI_CLOCK_RATE (2000000) // 500kbps
 #define UART_BAUD_RATE (115200)
 
 #endif /* CONFIG_HPP_ */

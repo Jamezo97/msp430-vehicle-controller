@@ -11,6 +11,7 @@
 #define CMD_RESET       (0b11000000) // Reset the controller
 #define CMD_READ        (0b00000011) // Read consecutive bytes, starting at the address specified by the second sent byte
 #define CMD_READ_RX     (0b10010000) // OR this with RX_RXBx
+#define CMD_WRITE       (0b00000010) // <Write> <Address> <Value> [Value m+1] [Value m+2]...
 #define CMD_LOAD_TX     (0b01000000) // OR this with TX_TXBx
 #define CMD_RTS         (0b10000000) // fill last 3 bits with flags for 3 TX buffers
 #define CMD_READ_STATUS (0b10100000) // Quick polling command that reads several status bits for transmit and receive functions.
@@ -28,5 +29,10 @@
 #define TX_TXB1D0   (0b011) // address 0x46
 #define TX_TXB2SIDH (0b100) // address 0x51
 #define TX_TXB2D0   (0b101) // address 0x56
+
+#define REG_CANINTE (0b00101011) // interrupt enable register
+
+
+#define REG_TXB0D0  (0b00110110) // Transmit buffer 0, data byte 0
 
 #endif /* CAN_CMD_HPP_ */
