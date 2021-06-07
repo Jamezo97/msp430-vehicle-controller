@@ -20,6 +20,47 @@
 
 ShiftRegister<uint8_t, TX_BUFF_SIZE, uint8_t> tx_buffer;
 ShiftRegister<uint8_t, RX_BUFF_SIZE, uint8_t> rx_buffer;
+// Clear these at the start of an SPI transmission
+volatile unsigned int tx_counter = 0;
+volatile unsigned int rx_counter = 0;
+
+void transmit(const uint8_t* data, unsigned int count) {
+    __disable_interrupt(); // prevent IR from breaking the following logic, we'll enable IR when we sleep
+    ENABLE_TX_IR; // enable TX ISR, either to notify us when empty or to cleanup when done
+    while(count--) {
+        while(!tx_buffer.shift(*data)) {
+            // Go to sleep, wake up when UART TX is triggered
+            __wakeup_on(WAKEUP_xx_TX);
+            GO_TO_SLEEP;
+        }
+        tx_counter++;
+        data++; // next byte
+    }
+    __enable_interrupt(); // all done, enable interrupts (outside of LPM) again
+}
+
+void transmit(uint8_t value) {
+    transmit(&value, 1);
+}
+
+void receive(uint8_t* data, unsigned int count) {
+    __disable_interrupt();
+//    ENABLE_RX_IR; // this should be enabled anyway??
+    while(count--) {
+        while(!rx_buffer.unshift(*data)) {
+            __wakeup_on(WAKEUP_xx_RX); // wake me up when there's something in the buffer
+            GO_TO_SLEEP;
+        }
+        data++; // next byte
+    }
+    __enable_interrupt(); // all done, enable interrupts (outside of LPM) again
+}
+
+uint8_t receive() {
+    uint8_t result;
+    receive(&result, 1);
+    return result;
+}
 
 uint8_t countrx() {
     return rx_buffer.size();
@@ -47,29 +88,6 @@ void delay_cycles(unsigned int count) {
     }
 }
 
-void transmit(uint8_t value) {
-    __disable_interrupt();
-    // Critical code section
-    ENABLE_TX_IR; // enable TX ISR, either to notify us when empty or to cleanup when done
-    while(!tx_buffer.shift(value)) {
-        // Go to sleep, wake up when UART TX is triggered
-        __wakeup_on(WAKEUP_xx_TX);
-        GO_TO_SLEEP;
-    }
-    __enable_interrupt(); // all done, enable interrupts (outside of LPM) again
-}
-
-uint8_t receive() {
-    uint8_t result;
-    __disable_interrupt();
-//    ENABLE_RX_IR; // this should be enabled anyway??
-    while(!rx_buffer.unshift(result)) {
-        __wakeup_on(WAKEUP_xx_RX); // wake me up when there's something in the buffer
-        GO_TO_SLEEP;
-    }
-    __enable_interrupt(); // all done, enable interrupts (outside of LPM) again
-    return result;
-}
 
 bool read(uint8_t& result) {
     return rx_buffer.unshift(result);
@@ -111,4 +129,5 @@ void OnRxISR() {
     // Chuck it into our byte shift register
     uint8_t result = UCxxRXBUF; // reading this register will reset the RX ISR flag
     rx_buffer.shift(result);
+    rx_counter++;
 }

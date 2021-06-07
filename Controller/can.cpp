@@ -11,43 +11,51 @@
 
 namespace can {
 
-class ChipSelectGuard {
-public:
-    ChipSelectGuard() {
-        spi::chip_select_can(1);
-        spi::delay_cycles(1);
-    }
-    ~ChipSelectGuard() {
-        spi::flush_tx();
-        spi::delay_cycles(1);
-        spi::chip_select_can(0);
-    }
-};
-
 void Init() {
     reset();
 }
 
+void read(uint8_t address, uint8_t* result, uint8_t count) {
+    spi::CanTransmission();
+    spi::transmit(CMD_READ);
+    spi::transmit(address);
+    for(uint8_t fill = count; fill > 0; --fill) {
+        spi::transmit(0);
+    }
+    // Wait for the first 2 don't-care bytes
+    spi::receive();
+    spi::receive();
+    // receive data as it arrives
+    spi::receive(result, count);
+}
+
+void read(uint8_t address, uint8_t count) {
+    spi::CanTransmission();
+    spi::transmit(CMD_READ);
+    spi::transmit(address);
+    for(uint8_t fill = count; fill > 0; --fill) {
+        spi::transmit(0);
+    }
+}
+
+void write(uint8_t address, uint8_t* data, uint8_t count) {
+    spi::CanTransmission();
+    spi::transmit(CMD_WRITE);
+    spi::transmit(address);
+    spi::transmit(data, count);
+}
+
 void reset() {
-    ChipSelectGuard();
+    spi::CanTransmission();
     spi::transmit(CMD_RESET);
 }
 
-void request_read() {
-    ChipSelectGuard();
-    spi::transmit(CMD_READ);
-    spi::transmit(REG_TXB0D0);
-    spi::transmit(0);
-    spi::wait_response(3);
+uint8_t test(uint8_t value) {
+    write(REG_TXB0D0, &value, 1);
+    uint8_t result;
+    read(REG_TXB0D0, &result, 1);
+    return result;
 }
-
-void request_write(uint8_t value) {
-    ChipSelectGuard();
-    spi::transmit(CMD_WRITE);
-    spi::transmit(REG_TXB0D0);
-    spi::transmit(value);
-}
-
 
 }
 

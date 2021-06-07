@@ -39,17 +39,11 @@ void commandLoop() {
                 uart::writeHex(count);
                 uart::write("Hello World This Is A Long String\r\n", 35);
             } while(count);
-        } else if(command == 'c') {
-            can::request_read();
-            uart::write("Request CAN read\r\n");
-        } else if(command == 'v') {
-            can::request_write(0xab);
-            uart::write("Request CAN write\r\n");
         } else if(command == 't') {
-            uart::write("Test:");
-            can::request_write(0xab);
-            can::request_read();
-            spi::print_rx();
+            uart::write("Test: ");
+            uint8_t result = can::test(0xab);
+            uart::writeHex(result);
+            uart::newline();
         } else if(command == 'p') {
             spi::print_rx();
         } else {
@@ -96,6 +90,7 @@ int main(void)
 
     uart::write("Hi\r\n");
     commandLoop();
+    return;
 }
 
 #pragma vector = USCIAB0TX_VECTOR

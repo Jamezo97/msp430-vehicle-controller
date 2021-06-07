@@ -84,13 +84,15 @@ void chip_select_pot(uint8_t selected) {
     }
 }
 
-void wait_response(uint8_t count) {
-    __disable_interrupt();
-    while(rx_buffer.size() < count) {
-        __wakeup_on(WAKEUP_xx_RX);
-        GO_TO_SLEEP;
+void wait_response() {
+    if(rx_counter < tx_counter) {
+        __disable_interrupt();
+        while(rx_counter < tx_counter) {
+            __wakeup_on(WAKEUP_xx_RX);
+            GO_TO_SLEEP;
+        }
+        __enable_interrupt();
     }
-    __enable_interrupt();
 }
 
 
@@ -104,7 +106,24 @@ void print_rx() {
     uart::newline();
 }
 
+void prepare() {
+    spi::tx_counter = 0;
+    spi::rx_counter = 0;
+    spi::tx_buffer.clear();
+    spi::rx_buffer.clear();
 }
 
+CanTransmission::CanTransmission() {
+    spi::prepare();
+    spi::chip_select_can(1);
+    spi::delay_cycles(1);
+}
+CanTransmission::~CanTransmission() {
+    spi::wait_response();
+    spi::chip_select_can(0);
+}
+
+
+} // namespace spi
 
 
