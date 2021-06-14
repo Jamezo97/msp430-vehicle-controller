@@ -30,7 +30,36 @@
 #define TX_TXB2SIDH (0b100) // address 0x51
 #define TX_TXB2D0   (0b101) // address 0x56
 
+#define CAN_OPMODE_NORMAL   (0b00000000)
+#define CAN_OPMODE_SLEEP    (0b00100000)
+#define CAN_OPMODE_LOOPBACK (0b01000000)
+#define CAN_OPMODE_LISTEN   (0b01100000)
+#define CAN_OPMODE_CONFIG   (0b10000000)
+
+// Same bits for INTF and INTE registers
+#define CAN_INT_RX0      (0x01)
+#define CAN_INT_RX1      (0x02)
+#define CAN_INT_TX0      (0x04)
+#define CAN_INT_TX1      (0x08)
+#define CAN_INT_TX2      (0x10)
+#define CAN_INT_ERRIE    (0x20)
+#define CAN_INT_WAKIE    (0x40)
+#define CAN_INT_MERRA    (0x80)
+
 #define REG_CANINTE (0b00101011) // interrupt enable register
+#define REG_CANINTF (0b00101100) // interrupt flag register
+#define REG_RXF0 (0b00000000) // Rx Filter 0, SIDH, SIDL, EID8, EID0
+#define REG_RXF1 (0b00000100) // Rx Filter 1, SIDH, SIDL, EID8, EID0
+#define REG_RXF2 (0b00001000) // Rx Filter 2, SIDH, SIDL, EID8, EID0
+#define REG_RXF3 (0b00010000) // Rx Filter 3, SIDH, SIDL, EID8, EID0
+#define REG_RXF4 (0b00010100) // Rx Filter 4, SIDH, SIDL, EID8, EID0
+#define REG_RXF5 (0b00011000) // Rx Filter 5, SIDH, SIDL, EID8, EID0
+
+#define REG_RXM0 (0b00100000) // Rx Mask 0, SIDH, SIDL, EID8, EID0
+#define REG_RXM1 (0b00100100) // Rx Mask 1, SIDH, SIDL, EID8, EID0
+
+#define REG_CANSTAT (0x0E)
+#define REG_CANCTRL (0x0F)
 
 
 #define REG_TXB0D0  (0b00110110) // Transmit buffer 0, data byte 0

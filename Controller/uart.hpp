@@ -61,6 +61,39 @@ inline void writeHex(uint8_t data) {
     transmit(a);
 }
 
+inline void writeHexArray(uint8_t* data, unsigned int len) {
+    for(unsigned int idx = 0; idx < len; idx++) {
+        writeHex(data[idx]);
+    }
+}
+
+inline void writeKeyValue(const char* name, uint8_t* data, uint8_t len, bool flip=false) {
+    write(name);
+    write(": 0x");
+    if(flip) {
+        for(uint8_t idx = len; idx > 0; idx--) {
+            writeHex(data[idx-1]);
+        }
+    } else {
+        for(uint8_t idx = 0; idx < len; idx++) {
+            writeHex(data[idx]);
+        }
+    }
+    newline();
+}
+
+inline void writeKeyValue(const char* name, uint8_t data) {
+    writeKeyValue(name, &data, 1);
+}
+
+inline void writeKeyValue(const char* name, uint16_t data) {
+    writeKeyValue(name, (uint8_t*)&data, 2, true);
+}
+
+inline void writeKeyValue(const char* name, uint32_t data) {
+    writeKeyValue(name, (uint8_t*)&data, 4, true);
+}
+
 template<typename T, unsigned int bufsize>
 inline void writeInt(T value) {
     char buf[bufsize];

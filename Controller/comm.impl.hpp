@@ -30,6 +30,7 @@ void transmit(const uint8_t* data, unsigned int count) {
     while(count--) {
         while(!tx_buffer.shift(*data)) {
             // Go to sleep, wake up when UART TX is triggered
+            ENABLE_TX_IR; // specifically enable again?
             __wakeup_on(WAKEUP_xx_TX);
             GO_TO_SLEEP;
         }
